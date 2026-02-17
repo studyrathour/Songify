@@ -1,0 +1,1071 @@
+================================================================================
+                         🎵 SONGIFY - FULL STACK BUILD PROMPT
+================================================================================
+              Complete Android Music Application Build Specification
+         YouTube Music Streaming | Material You Design | Offline Playback
+================================================================================
+
+
+================================================================================
+1. EXECIVE SUMMARY
+================================================================================
+
+Songify is a comprehensive Android music streaming application that leverages 
+the official YouTube Data API and InnerTube protocol to provide ad-free music 
+streaming, offline playback, and synchronized lyrics. This document provides a 
+complete specification for building a production-ready music application with 
+modern Material You design, robust playback capabilities, and full offline support.
+
+The application is designed to deliver a premium user experience with features 
+including background playback, Android Auto support, home screen widgets, Discord 
+Rich Presence integration, Last.fm scrobbling, and intelligent queue management 
+with smart recommendations. All streaming is performed through official YouTube 
+APIs ensuring compliance and reliability.
+
+
+================================================================================
+2. APP REBRANDING REQUIREMENTS
+================================================================================
+
+2.1 Core Identity Changes
+-------------------------
++------------------+-------------------+--------------------------------+
+| Parameter        | Old Value         | New Value                      |
++------------------+-------------------+--------------------------------+
+| App Name         | Vivi / Audify     | Songify                        |
+| Package Name     | com.vivi.vivimusic| com.songify.app                |
+| Developer Name   | Previous Developer| Suraj Singh Rathour            |
+| Contact          | Previous Contact  | Telegram: @SURAJ_EduMaster     |
+| Default Country  | System Default    | India                          |
++------------------+-------------------+--------------------------------+
+
+2.2 Sections to REMOVE
+----------------------
+- Check for Update (Settings) - OTA update checking functionality
+- External Integrations (Settings) - Third-party service integrations section
+- Developer Details section (About/Settings) - All previous developer attribution
+- Repository links and references - GitHub/source code references
+- Any previous developer attribution in about screens
+
+2.3 Sections to ADD/MODIFY
+--------------------------
+- Developer Name: Suraj Singh Rathour (Ravi Shankar Rathour)
+- Telegram Link: https://t.me/SURAJ_EduMaster
+- Contact section in About/Settings with developer information
+- Default country setting: India (IN)
+
+
+================================================================================
+3. BUILD REQUIREMENTS
+================================================================================
+
+3.1 Output Configuration
+------------------------
+Output Type:       APK Only (Release Build)
+Output Directory:  release/
+Filename:          Songify-v[version].apk
+Signing:           Release signed
+Architecture:      Universal or arm64-v8a
+
+3.2 Build Variants
+------------------
+1. universal  - Supports all architectures (armeabi-v7a, arm64-v8a, x86, x86_64)
+2. arm64      - Optimized for modern 64-bit ARM devices
+3. armeabi    - Support for older 32-bit ARM devices
+4. x86        - For x86 Android emulators and devices
+5. x86_64     - For 64-bit x86 devices
+
+
+================================================================================
+4. TECHNOLOGY STACK
+================================================================================
+
+4.1 Core Technologies
+---------------------
++------------------+------------------------------------------+
+| Component        | Technology                               |
++------------------+------------------------------------------+
+| Platform         | Android (minSdk 26, targetSdk 36)        |
+| Language         | Kotlin 2.2.10 with Java 21               |
+| UI Framework     | Jetpack Compose 1.9.4 + Material 3       |
+| DI Framework     | Hilt 2.57.1 (Dagger)                     |
+| Database         | Room 2.7.2 with SQLite                   |
+| Media Playback   | ExoPlayer / Media3 1.7.1                 |
+| Networking       | Ktor 3.3.0 + OkHttp                      |
+| Image Loading    | Coil 3.3.0                               |
+| Serialization    | Kotlinx Serialization                    |
+| Async            | Kotlin Coroutines + Flow                 |
++------------------+------------------------------------------+
+
+4.2 Module Structure
+--------------------
+- app          - Main application module with UI, ViewModels, and core functionality
+- innertube    - YouTube InnerTube API integration for music streaming
+- kugou        - KuGou lyrics provider for Chinese/Japanese songs
+- lrclib       - LRC Lib lyrics provider for time-synced lyrics
+- kizzy        - Discord Rich Presence integration module
+- lastfm       - Last.fm scrobbling integration
+- betterlyrics - Better Lyrics provider for enhanced lyrics
+
+
+================================================================================
+5. UI DESIGN SPECIFICATIONS
+================================================================================
+
+5.1 Global Theme - Color Palette
+--------------------------------
++------------------+------------+------------------------------------------+
+| Element          | Color Code | Usage                                    |
++------------------+------------+------------------------------------------+
+| Primary          | #4725f4    | Vibrant Purple - Main accent             |
+| Primary Dark     | #3a1dcc    | Darker variant for pressed states        |
+| Primary Light    | #6b4cf7    | Lighter variant                          |
+| Background Dark  | #131022    | Deep Navy - Main background              |
+| Background Alt   | #0a0912    | Darker Navy - Alternative background     |
+| Surface          | rgba(255,  | Surface overlays                         |
+|                  | 255,255,   |                                          |
+|                  | 0.03)      |                                          |
+| Text Primary     | #FFFFFF    | White - Primary text                     |
+| Text Secondary   | rgba(255,  | 60% opacity - Secondary text             |
+|                  | 255,255,   |                                          |
+|                  | 0.6)       |                                          |
+| Text Tertiary    | rgba(255,  | 40% opacity - Tertiary text              |
+|                  | 255,255,   |                                          |
+|                  | 0.4)       |                                          |
+| Border           | rgba(255,  | 8% opacity - Borders                     |
+|                  | 255,255,   |                                          |
+|                  | 0.08)      |                                          |
+| Error            | #ef4444    | Red - Error states                       |
+| Success          | #22c55e    | Green - Success states                   |
+| Warning          | #f59e0b    | Orange - Warning states                  |
++------------------+------------+------------------------------------------+
+
+5.2 Typography System
+---------------------
+Font Family: Inter (Google Fonts)
+Weights: 300 (Light), 400 (Regular), 500 (Medium), 600 (Semibold), 700 (Bold)
+
++------------------+------------------------------+------------------------+
+| Element          | Specifications               | Usage                  |
++------------------+------------------------------+------------------------+
+| Headlines        | 24-32px, Bold, Line-height:  | Major titles           |
+|                  | 1.2                          |                        |
+| Titles           | 16-20px, Semibold,           | Section headers        |
+|                  | Line-height: 1.3             |                        |
+| Body             | 14-16px, Regular,            | Main content           |
+|                  | Line-height: 1.5             |                        |
+| Captions         | 10-12px, Medium,             | Helper text            |
+|                  | Line-height: 1.4             |                        |
+| Labels           | 10px, Bold, Uppercase,       | Tag/category labels    |
+|                  | Tracking: 0.2em              |                        |
++------------------+------------------------------+------------------------+
+
+5.3 Spacing System
+------------------
+xs: 4px    | sm: 8px   | md: 16px   | lg: 24px
+xl: 32px   | 2xl: 48px | 3xl: 64px  | 4xl: 96px
+
+5.4 Border Radius
+-----------------
+sm: 4px    | DEFAULT: 8px | md: 12px   | lg: 16px
+xl: 24px   | 2xl: 32px    | full: 9999px (pill)
+
+5.5 Visual Effects
+------------------
+Glass Effect:
+  background: rgba(255,255,255,0.03)
+  backdrop-filter: blur(12px)
+  border: 1px solid rgba(255,255,255,0.08)
+
+Gradient Overlays:
+  Hero: radial-gradient at top-right rgba(71,37,244,0.15) to transparent
+
+Text Glow (Active Lyrics):
+  text-shadow: 0 0 15px rgba(255,255,255,0.3)
+
+Blurred Background:
+  filter: blur(60px) brightness(0.6)
+  transform: scale(1.2)
+
+
+================================================================================
+6. PLAYER UI SPECIFICATIONS
+================================================================================
+
+6.1 Now Playing Screen
+----------------------
+The full-screen player provides an immersive experience with synchronized lyrics 
+display and playback controls.
+
+HEADER SECTION (80px height)
+---------------------------
+Container:
+  - Layout: flex row, justify-between, items-center
+  - Padding: 24px horizontal, 32px top, 16px bottom
+  - Position: fixed top, z-index: 10
+
+Left Button:
+  - Size: 40x40px circle
+  - Background: rgba(255,255,255,0.1)
+  - Backdrop-filter: blur(12px)
+  - Icon: expand_more (Material Symbols Outlined, 24px)
+  - Action: Minimize player / Go back
+
+Center Content:
+  - Layout: flex column, center aligned
+  - Label: "NOW PLAYING"
+    - Font: 10px, bold, uppercase
+    - Letter-spacing: 0.2em
+    - Color: rgba(255,255,255,0.6)
+  - Title: [Song Name]
+    - Font: 14px, semibold
+    - Color: white
+    - Max-width: 180px, truncate
+  - Subtitle: [Artist • Album]
+    - Font: 11px, regular
+    - Color: rgba(255,255,255,0.5)
+
+Right Button:
+  - Same as left button
+  - Icon: more_horiz (Material Symbols, 24px)
+  - Action: Show options menu
+
+LYRICS AREA
+-----------
+Container:
+  - Layout: flex column
+  - Overflow-y: auto, scrollbar-hidden
+  - Padding: 32px horizontal
+  - Padding-top: 80px (buffer)
+  - Padding-bottom: 160px (buffer)
+  - Scroll-behavior: smooth
+
+Individual Lyric Lines:
+  - Font-size: 24px (mobile) / 32px (tablet)
+  - Font-weight: 700 (bold)
+  - Line-height: 1.2
+  - Margin-bottom: 32px
+  - Text-align: center
+
+Inactive State:
+  - Color: rgba(255,255,255,0.3)
+  - Transition: opacity 300ms ease
+
+Active State:
+  - Color: #FFFFFF
+  - Font-size: 32px (mobile) / 40px (tablet)
+  - Text-shadow: 0 0 15px rgba(255,255,255,0.3)
+  - Transition: all 300ms ease
+
+Background:
+  Layer 1: Album artwork (full screen)
+    - Filter: blur(60px) brightness(0.6)
+    - Transform: scale(1.2)
+  Layer 2: Gradient overlay
+    - linear-gradient(to bottom,
+        rgba(19,16,34,0.8) 0%,
+        rgba(19,16,34,0.4) 20%,
+        rgba(19,16,34,0.4) 80%,
+        rgba(19,16,34,0.9) 100%)
+
+PROGRESS BAR
+------------
+Container:
+  - Margin-bottom: 24px
+
+Track:
+  - Height: 4px
+  - Width: 100%
+  - Background: rgba(255,255,255,0.2)
+  - Border-radius: 9999px (full)
+
+Fill:
+  - Height: 100%
+  - Background: #4725f4 (primary)
+  - Border-radius: inherit
+  - Width: [current_time / total_time * 100%]
+  - Transition: width 100ms linear
+
+Thumb (optional):
+  - Size: 12px circle
+  - Background: white
+  - Position: at fill end
+  - Box-shadow: 0 2px 8px rgba(0,0,0,0.3)
+
+Time Labels:
+  - Layout: flex row, justify-between
+  - Margin-top: 8px
+  - Font: 10px, medium, tabular-nums
+  - Color: rgba(255,255,255,0.5)
+  - Format: MM:SS
+
+PLAYBACK CONTROLS
+-----------------
+Container:
+  - Layout: flex row, justify-center, items-center
+  - Gap: 32px
+
+Shuffle Button:
+  - Icon: shuffle (Material Symbols, 24px)
+  - Color: rgba(255,255,255,0.6)
+  - Hover: white
+  - Active state: primary color
+
+Previous Button:
+  - Icon: skip_previous (Material Symbols, 32px)
+  - Font-variation-settings: 'FILL' 1
+  - Color: white
+  - Hover: primary color
+  - Transition: color 150ms ease
+
+Play/Pause Button:
+  - Size: 64x64px circle
+  - Background: white
+  - Icon: pause / play_arrow (32px)
+  - Font-variation-settings: 'FILL' 1
+  - Color: #131022 (background-dark)
+  - Hover: scale(1.05)
+  - Active: scale(0.95)
+  - Transition: transform 150ms ease
+
+Next Button:
+  - Icon: skip_next (Material Symbols, 32px)
+  - Font-variation-settings: 'FILL' 1
+  - Color: white
+  - Hover: primary color
+
+Repeat Button:
+  - Icon: repeat (Material Symbols, 24px)
+  - Color: rgba(255,255,255,0.6)
+  - Hover: white
+  - Active state: primary color
+  - Repeat one: icon changes to repeat_one
+
+ACTION BAR
+----------
+Container:
+  - Layout: flex row, justify-space-around
+  - Margin-top: 32px
+  - Padding-top: 8px
+
+Action Items (4 total):
+  - Layout: flex column, center, flex-1
+  - Gap: 4px
+
+Inactive State:
+  - Icon color: rgba(255,255,255,0.4)
+  - Font-variation-settings: 'FILL' 0
+
+Active State:
+  - Icon color: #4725f4 (primary)
+  - Font-variation-settings: 'FILL' 1
+
+Icons (left to right):
+  1. lyrics - Show full lyrics
+  2. mic - Sing along / voice search
+  3. playlist_play - Show queue
+  4. share - Share song
+
+6.2 Player Background Styles
+----------------------------
+1. DEFAULT: Standard Material You background with theme colors
+2. BLUR: Album artwork with heavy blur effect (100-150dp)
+3. GRADIENT: Dynamic gradient extracted from album art colors
+4. APPLE_MUSIC: Full-screen album art with blur gradient overlay
+
+6.3 Mini Player
+---------------
+Collapsed player shown at bottom of screen when main player is minimized:
+- Height: 64dp (QueuePeekHeight)
+- Album thumbnail: 48x48px
+- Song title with marquee
+- Play/pause button
+- Progress indicator
+
+
+================================================================================
+7. CORE FEATURES IMPLEMENTATION
+================================================================================
+
+7.1 YouTube Integration (InnerTube)
+-----------------------------------
+The app uses the InnerTube protocol to communicate with YouTube's internal API.
+
+API Configuration:
+  - Base URL: https://music.youtube.com/youtubei/v1/
+  - Clients: WEB_REMIX (YouTube Music), WEB (YouTube)
+  - Content-Type: application/json
+  - Required Headers:
+    - X-Goog-Api-Format-Version: 1
+    - X-YouTube-Client-Name: [clientId]
+    - X-YouTube-Client-Version: [clientVersion]
+    - X-Origin: https://music.youtube.com
+    - Referer: https://music.youtube.com/
+
+Authentication:
+  - SAPISID cookie-based authentication
+  - SAPISIDHASH header for authenticated requests
+  - Formula: SHA1(currentTime + SAPISID + ORIGIN)
+
+Key Endpoints:
+  - player: Get stream URLs and playback info
+  - browse: Browse content (home, albums, artists)
+  - search: Search for songs, albums, artists
+  - next: Get next songs in queue
+  - get_queue: Get full queue from playlist
+  - get_transcript: Get video subtitles/lyrics
+
+Stream URL Handling:
+  - Parse adaptive formats from player response
+  - Handle signature timestamps for protected content
+  - Support quality selection (High/Medium/Low)
+  - Cache stream URLs with expiry tracking
+
+7.2 Music Playback Service
+--------------------------
+The MusicService extends MediaLibraryService for background playback.
+
+ExoPlayer Configuration:
+  - Wake lock: WAKE_MODE_NETWORK
+  - Audio attributes: USAGE_MEDIA, CONTENT_TYPE_MUSIC
+  - Seek increments: 5000ms (5 seconds)
+  - Skip silence support (configurable)
+
+Audio Focus:
+  - AudioFocusRequest with AUDIOFOCUS_GAIN
+  - Handle focus loss: pause playback
+  - Handle focus loss transient: pause playback
+  - Handle ducking: reduce volume to 20%
+
+Media Session:
+  - MediaLibrarySession with custom commands:
+    - CommandToggleLike
+    - CommandToggleRepeatMode
+    - CommandToggleShuffle
+    - CommandToggleStartRadio
+  - Custom notification layout with like, repeat, shuffle buttons
+
+Persistent Queue:
+  - Save queue to disk on app background
+  - Restore queue on app start
+  - Periodic saves (30 seconds interval)
+  - More frequent saves when playing (10 seconds)
+
+Sleep Timer:
+  - Configurable duration (5-120 minutes)
+  - End of song option
+  - Proper cleanup on timer expiry
+
+Loudness Normalization:
+  - LoudnessEnhancer for consistent volume
+  - Parse loudnessDb from format entity
+  - Apply gain based on perceived loudness
+
+7.3 Download Manager
+--------------------
+Offline playback supported through ExoPlayer's DownloadManager.
+
+Configuration:
+  - Max parallel downloads: 3
+  - Download cache: Separate from playback cache
+  - Notification channel: "download_channel"
+
+Data Source Factory:
+  - ResolvingDataSource for URL resolution
+  - Check cache before fetching
+  - Handle expired stream URLs
+  - Store format info in database
+
+Download States:
+  - STATE_COMPLETED: Mark isDownloaded = true
+  - STATE_FAILED: Mark isDownloaded = false
+  - STATE_STOPPED: Mark isDownloaded = false
+  - STATE_REMOVING: Mark isDownloaded = false
+
+Database Tracking:
+  - isDownloaded: Boolean flag
+  - dateDownload: LocalDateTime
+  - FormatEntity: itag, bitrate, sampleRate, contentLength
+
+7.4 Lyrics System
+-----------------
+Multiple lyrics providers with concurrent fetching and fallback priority.
+
+Provider Priority (configurable):
+  1. Better Lyrics - Time-synced with word-by-word highlighting
+  2. SimpMusic - Community-sourced synced lyrics
+  3. LRC Lib - Open-source lyrics database
+  4. KuGou - Chinese/Japanese lyrics provider
+  5. YouTube Subtitles - Caption-based fallback
+  6. YouTube Lyrics - YouTube Music's built-in lyrics
+
+Lyrics Format:
+  - LRC format: [mm:ss.xx] lyrics text
+  - Synced: Scrollable with current line highlight
+  - Plain text: Static display
+
+Performance:
+  - LRU cache (size: 3)
+  - Concurrent provider fetching
+  - "Race" logic for fastest synced lyrics
+  - Network availability check before fetching
+
+
+================================================================================
+8. DATABASE SCHEMA
+================================================================================
+
+Room database with the following entities (Version 28):
+
+SongEntity
+----------
+- id: String (PRIMARY KEY) - YouTube video ID
+- title: String - Song title
+- duration: Int - Duration in seconds
+- thumbnailUrl: String? - Album art URL
+- liked: Boolean - Favorite status
+- totalPlayTime: Long - Total play time in milliseconds
+- inLibrary: Long? - Timestamp when added to library
+- explicit: Boolean - Explicit content flag
+- isVideo: Boolean - True if music video
+- isDownloaded: Boolean - Offline availability
+- dateDownload: LocalDateTime? - Download timestamp
+- lyricsOffset: Int - Manual lyrics timing offset
+- isUploaded: Boolean - User uploaded content
+
+ArtistEntity
+------------
+- id: String (PRIMARY KEY)
+- name: String
+- thumbnailUrl: String?
+
+AlbumEntity
+-----------
+- id: String (PRIMARY KEY)
+- title: String
+- year: Int?
+- thumbnailUrl: String?
+- songCount: Int
+- duration: Int
+- lastUpdateTime: Long
+- bookmarkedAt: Long?
+- browseId: String?
+- description: String?
+- isUploaded: Boolean
+
+PlaylistEntity
+--------------
+- id: String (PRIMARY KEY)
+- name: String
+- browseId: String?
+- bookmarkedAt: Long?
+- isEditable: Boolean
+- createdAt: Long
+- lastUpdateTime: Long
+
+FormatEntity
+------------
+- id: String (PRIMARY KEY)
+- itag: Int - YouTube format identifier
+- mimeType: String
+- codecs: String
+- bitrate: Int
+- sampleRate: Int?
+- contentLength: Long
+- loudnessDb: Float?
+- perceptualLoudnessDb: Float?
+- playbackUrl: String?
+
+LyricsEntity
+------------
+- id: String (PRIMARY KEY)
+- lyrics: String - LRC or plain text
+
+Event
+-----
+- songId: String
+- timestamp: Long
+- playTime: Long - Duration of this play session
+
+PlayCountEntity
+---------------
+- songId: String
+- year: Int
+- month: Int
+- dayOfWeek: Int
+- day: Int
+- week: Int
+- count: Int
+
+SearchHistory
+-------------
+- id: Int (PRIMARY KEY, auto-increment)
+- query: String (UNIQUE)
+
+Related Tables:
+- SongArtistMap: Many-to-many song-artist relationship
+- SongAlbumMap: Song-album relationship with track index
+- AlbumArtistMap: Album-artist relationship
+- PlaylistSongMap: Playlist-song with position
+- SetVideoIdEntity: YouTube playlist video IDs
+
+
+================================================================================
+9. SCREENS AND NAVIGATION
+================================================================================
+
+9.1 Main Navigation (Bottom Bar)
+--------------------------------
+Four main sections accessible via bottom navigation:
+
+1. HOME
+   - Quick Picks: Recently played songs in groups of 4
+   - Keep Listening: Recent albums/artists grid
+   - Similar Recommendations: Based on listening history
+   - Account Playlists: User's YouTube Music playlists
+   - Forgotten Favorites: Long-unplayed liked songs
+   - YouTube Home Feed: Carousels from YouTube Music
+
+2. EXPLORE
+   - New Releases: Latest albums
+   - Mood and Genres: Browse by mood/genre categories
+   - Charts: Music charts by country
+
+3. LIBRARY
+   - Songs: All downloaded/liked songs
+   - Albums: Saved albums
+   - Artists: Followed artists
+   - Playlists: Local and synced playlists
+
+4. SEARCH
+   - Search bar with voice input
+   - Search filters: Songs, Albums, Artists, Playlists, Videos
+   - Search history with clear option
+   - Search suggestions
+
+9.2 Additional Screens
+----------------------
+Album Screen:
+  - Album cover, title, year, artist
+  - Track list with duration
+  - Play/Shuffle buttons
+  - Related albums carousel
+
+Artist Screen:
+  - Artist image, name, subscriber count
+  - Top songs, albums, singles
+  - Related artists
+  - Subscribe button
+
+Playlist Screen:
+  - Playlist cover, title, song count
+  - Editable song list (drag to reorder)
+  - Play/Shuffle buttons
+  - Add to library option
+
+History Screen:
+  - Chronological list of played songs
+  - Clear history option
+  - Filter by time period
+
+Stats Screen:
+  - Most played songs/artists
+  - Listening time statistics
+  - Time period filters (7 days, 30 days, all time)
+
+Settings Screen:
+  - Organized by category
+  - Search within settings
+  - Reset to defaults
+
+
+================================================================================
+10. SETTINGS CATEGORIES
+================================================================================
+
+1. APPEARANCE
+   - Dark Mode: On/Off/Auto
+   - Pure Black: AMOLED-friendly dark theme
+   - Player Background Style: Default/Blur/Gradient/Apple Music
+   - Player Buttons Style: Default/Secondary/Tertiary
+   - Slider Style: Default/Wavy/Squiggly
+   - New Player Design: Toggle modern player layout
+   - Max Image Cache Size: 0-1024 MB
+
+2. PLAYER
+   - Audio Quality: Auto/High/Low
+   - Skip Silence: Remove silent parts
+   - Audio Normalization: Loudness leveling
+   - Audio Offload: Hardware audio processing
+   - Keep Screen On: Prevent screen timeout during playback
+   - Pause on Headphones Disconnect
+   - Pause on Zero Volume
+   - Smart Suggestions: Auto-load similar songs
+   - Auto Load More: Automatically queue more songs
+   - Disable Load More When Repeat All
+
+3. STORAGE
+   - Download Location: Set custom path
+   - Download Path: Current download directory
+   - Clear Download Cache: Remove cached streams
+   - Clear Image Cache: Remove cached images
+   - Clear Song Cache: Remove cached songs
+
+4. PRIVACY
+   - Pause Listen History: Stop recording plays
+   - History Duration: How long to keep history
+   - Clear History: Remove all play history
+   - Clear Search History
+
+5. CONTENT
+   - Content Language: Song/artist metadata language
+   - Content Country: Regional content
+   - Hide Explicit Songs: Filter explicit content
+   - Hide Video Songs: Show only audio tracks
+
+6. INTEGRATIONS
+   - Discord RPC: Enable/disable
+     - Show Details: Display song info on Discord
+     - Login: Discord authentication
+   - Last.fm Scrobbling: Enable/disable
+     - Login: Last.fm authentication
+     - Now Playing: Enable "now playing" notification
+     - Scrobble Delay (Seconds)
+     - Scrobble Delay (Percentage)
+     - Minimum Song Duration for Scrobbling
+
+7. BACKUP & RESTORE
+   - Backup: Export database and settings
+   - Restore: Import from backup
+   - Auto Backup: Periodic automatic backups
+
+8. ABOUT
+   - App Version
+   - Developer: Suraj Singh Rathour
+   - Contact: Telegram @SURAJ_EduMaster
+   - Open Source Licenses
+   - Privacy Policy
+
+
+================================================================================
+11. ANDROID MANIFEST CONFIGURATION
+================================================================================
+
+11.1 Required Permissions
+--------------------------
+- INTERNET: Network access for streaming
+- POST_NOTIFICATIONS: Android 13+ notification permission
+- ACCESS_NETWORK_STATE: Network connectivity checks
+- RECEIVE_BOOT_COMPLETED: Auto-start on boot
+- WAKE_LOCK: Keep playback running in background
+- FOREGROUND_SERVICE: Background playback service
+- FOREGROUND_SERVICE_MEDIA_PLAYBACK: Media playback foreground type
+- FOREGROUND_SERVICE_DATA_SYNC: Download service foreground type
+- BLUETOOTH_CONNECT: Bluetooth device connection
+- WRITE_EXTERNAL_STORAGE: Download storage (legacy)
+- READ_EXTERNAL_STORAGE: Read local files (legacy)
+- VIBRATE: Haptic feedback
+
+11.2 Services
+-------------
+MusicService:
+  - Extends: MediaLibraryService
+  - foregroundServiceType: mediaPlayback
+  - Intent filters:
+    - androidx.media3.session.MediaSessionService
+    - androidx.media3.session.MediaLibraryService
+    - android.media.browse.MediaBrowserService
+
+ExoDownloadService:
+  - Extends: DownloadService
+  - foregroundServiceType: dataSync
+  - Intent filter:
+    - androidx.media3.exoplayer.downloadService.action.RESTART
+
+11.3 Intent Filters
+-------------------
+YouTube URL handling:
+  - youtube.com/watch
+  - youtube.com/v/
+  - youtube.com/embed/
+  - youtube.com/playlist
+  - youtube.com/channel/
+  - youtube.com/user/
+  - youtube.com/c/
+  - youtube.com/browse/
+  - youtube.com/search
+  - m.youtube.com/*
+  - www.youtube.com/*
+  - music.youtube.com/*
+  - youtu.be/*
+  - vnd.youtube://
+  - vnd.youtube.launch://
+
+Share handling:
+  - Action: android.intent.action.SEND
+  - MIME type: text/plain
+
+
+================================================================================
+12. HOME SCREEN WIDGETS
+================================================================================
+
+12.1 Standard Music Widget
+--------------------------
+Features:
+  - Album artwork display (rounded corners)
+  - Song title with artist name
+  - Play/pause button
+  - Like button for quick favorites
+  - Progress indicator
+
+Actions:
+  - Tap artwork: Open app
+  - Tap play/pause: Toggle playback
+  - Tap like: Toggle favorite status
+  - Tap title: Open to now playing
+
+12.2 Waves Widget
+-----------------
+Features:
+  - Animated wave progress visualization
+  - Compact design for minimal space
+  - Song title display
+  - Play/pause functionality
+
+Configuration:
+  - Background: Semi-transparent
+  - Wave animation: Smooth progress indication
+
+
+================================================================================
+13. ANDROID AUTO SUPPORT
+================================================================================
+
+Media Library Structure:
+  - Root: Library, Playlists, History, Downloads
+  - Library: Songs, Albums, Artists
+  - Playlists: All user playlists
+
+Custom Playback Actions:
+  - Like: Toggle favorite
+  - Shuffle: Enable/disable shuffle
+  - Repeat: Cycle repeat modes
+  - Start Radio: Generate radio from current song
+
+Search Integration:
+  - Voice search support
+  - MEDIA_PLAY_FROM_SEARCH intent
+  - Return results in car-friendly format
+
+Queue Management:
+  - Browse queue
+  - Play next
+  - Add to queue
+
+
+================================================================================
+14. THIRD-PARTY INTEGRATIONS
+================================================================================
+
+14.1 Discord Rich Presence
+--------------------------
+Implementation:
+  - WebSocket connection to Discord Gateway
+  - Heartbeat maintenance
+  - Activity payload updates
+
+Displayed Information:
+  - Song title and artist
+  - Album artwork (via proxy server)
+  - Playback state (playing/paused)
+  - Current progress with timestamp
+  - "Listening to Songify" status
+
+Configuration Options:
+  - Enable/disable Discord RPC
+  - Show/hide song details
+  - Discord login for authentication
+
+14.2 Last.fm Scrobbling
+-----------------------
+Implementation:
+  - Last.fm API integration
+  - Session-based authentication
+  - Track.scrobble and Track.updateNowPlaying APIs
+
+Scrobbling Rules:
+  - Configurable delay (seconds or percentage)
+  - Minimum song duration filter
+  - Only scrobble when play threshold reached
+  - Now Playing notification support
+
+
+================================================================================
+15. AUDIO QUALITY SETTINGS
+================================================================================
+
++----------+----------------+----------------------------------+
+| Quality  | Bitrate        | Description                      |
++----------+----------------+----------------------------------+
+| Auto     | ~128-256 kbps  | Adaptive based on network        |
+| High     | ~256 kbps      | High quality audio               |
+| Low      | ~64-128 kbps   | Data saver mode                  |
++----------+----------------+----------------------------------+
+
+Format Selection:
+  - Prefer opus format for web streaming
+  - Fallback to mp4a for compatibility
+  - Parse itag codes for quality selection
+
+
+================================================================================
+16. BUILD COMMANDS
+================================================================================
+
+16.1 Debug Build
+----------------
+./gradlew assembleUniversalFossDebug
+./gradlew assembleArm64FossDebug
+
+16.2 Release Build
+------------------
+./gradlew assembleUniversalFossRelease
+./gradlew assembleArm64FossRelease
+
+16.3 Output Location
+--------------------
+app/build/outputs/apk/universalFoss/release/app-universal-foss-release.apk
+app/build/outputs/apk/arm64Foss/release/app-arm64-foss-release.apk
+
+16.4 Build Variants
+-------------------
+Product Flavors:
+  - abi: universal, arm64, armeabi, x86, x86_64
+  - distribution: foss (FOSS), standard (includes proprietary)
+
+Recommended: universalFoss or arm64Foss
+
+
+================================================================================
+17. SIGNING CONFIGURATION
+================================================================================
+
+Keystore Location:
+  app/keystore/release.keystore
+
+Environment Variables Required:
+  - STORE_PASSWORD: Keystore password
+  - KEY_ALIAS: Key alias name
+  - KEY_PASSWORD: Key password
+
+Build.gradle.kts Configuration:
+  signingConfigs {
+      create("release") {
+          storeFile = file("keystore/release.keystore")
+          storePassword = System.getenv("STORE_PASSWORD")
+          keyAlias = System.getenv("KEY_ALIAS")
+          keyPassword = System.getenv("KEY_PASSWORD")
+      }
+  }
+
+Release Build Type:
+  buildTypes {
+      release {
+          isMinifyEnabled = true
+          isShrinkResources = true
+          proguardFiles(...)
+          signingConfig = signingConfigs.getByName("release")
+      }
+  }
+
+
+================================================================================
+18. IMPLEMENTATION NOTES
+================================================================================
+
+18.1 Smart Queue Management
+---------------------------
+Auto-load More:
+  - Trigger: 5 or fewer songs remaining
+  - Fetches next page from current queue
+  - Respects "Disable Load More When Repeat All"
+
+Smart Suggestions:
+  - Fetches related songs from YouTube
+  - Diversity filter: Max 3 songs per artist
+  - Deduplication against current queue
+  - Background automix queue
+
+Infinite Queue:
+  - When fixed queue ends, fetch suggestions
+  - Maintains continuous playback experience
+
+18.2 Error Handling
+-------------------
+Network Errors:
+  - Wait for network restoration
+  - Exponential backoff (3s, 6s, 12s, 24s... max 30s)
+  - Max 5 retry attempts
+  - Show waiting indicator
+
+Playback Errors:
+  - Consecutive error counter (max 10)
+  - Auto-skip to next song on error
+  - Pause after too many errors
+  - User intervention required after pause
+
+Stream URL Expiry:
+  - Cache URLs with expiry timestamp
+  - Auto-refresh expired URLs
+  - Retry with fresh URL on failure
+
+18.3 Performance Optimizations
+------------------------------
+Image Caching:
+  - Coil with configurable disk cache
+  - Memory cache for thumbnails
+  - Hardware bitmap enabled for API 28+
+
+Palette Extraction:
+  - Extract colors from album art
+  - Cache gradient colors per song
+  - Use for player background
+
+Lazy Loading:
+  - Proper key and contentType for lists
+  - Stable types for items
+  - Avoid unnecessary recomposition
+
+Power Saver Mode:
+  - Pause on zero volume (configurable)
+  - Reduce background operations
+  - Disable non-essential features
+
+
+================================================================================
+19. FINAL DELIVERABLE
+================================================================================
+
+The build process must output a signed release APK named:
+  Songify-v[version].apk
+
+Requirements:
+  ✓ Ready for distribution
+  ✓ All features implemented per specification
+  ✓ Zero lint errors
+  ✓ Tested on phone and tablet form factors
+  ✓ Android Auto support verified
+  ✓ Home screen widgets functional
+  ✓ All integrations working (Discord, Last.fm)
+
+Package Name: com.songify.app
+Application Name: Songify
+Developer: Suraj Singh Rathour (Ravi Shankar Rathour)
+Contact: Telegram @SURAJ_EduMaster
+Default Country: India
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
