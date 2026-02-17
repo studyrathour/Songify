@@ -41,6 +41,37 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
     }
+
+    applicationVariants.all {
+        if (buildType.name == "release") {
+            outputs.all {
+                val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+                output.outputFileName = "Songify-v${defaultConfig.versionName}.apk"
+            }
+        }
+    }
+
+    // Custom task to copy release APK to root/release/release/
+    tasks.register("copyReleaseApk") {
+        dependsOn("assembleRelease")
+        doLast {
+            val version = defaultConfig.versionName
+            val apkName = "Songify-v${version}.apk"
+            val sourceFile = layout.buildDirectory.file("outputs/apk/release/$apkName").get().asFile
+            val destDir = rootProject.layout.projectDirectory.dir("release/release").asFile
+
+            if (!destDir.exists()) {
+                destDir.mkdirs()
+            }
+
+            if (sourceFile.exists()) {
+                sourceFile.copyTo(destDir.resolve(apkName), overwrite = true)
+                println("Copied Release APK to: ${destDir.resolve(apkName).absolutePath}")
+            } else {
+                println("Release APK not found at: ${sourceFile.absolutePath}")
+            }
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
