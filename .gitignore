@@ -52,6 +52,3 @@ google-services.json
 
 # Local properties
 keystore.properties
-
-# Release directory (artifacts)
-release/
